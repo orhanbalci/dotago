@@ -2,6 +2,14 @@
 name = "dotago"
 version = "0.1.0"
 edition = "2021"
+authors = ["orhanbalci@gmail.com <orhanbalci@gmail.com>"]
+description = "syntactic sugar for time calculations"
+repository = "https://github.com/orhanbalci/dotago.git"
+homepage = "https://github.com/orhanbalci"
+keywords = ["date","datetime"]
+license = "MIT"
+readme = "README.md"
+categories = ["date-and-time"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
