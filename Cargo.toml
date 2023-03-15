@@ -10,4 +10,4 @@ chrono = "0.4.24"
 num-traits = "0.2.15"
 
 [dev-dependencies]
-claim = "0.5"
+claims = "0.7"

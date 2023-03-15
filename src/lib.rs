@@ -1,5 +1,7 @@
 use chrono::prelude::*;
 use chrono::Duration;
+use chrono::LocalResult;
+use chrono::Utc;
 use num_traits::cast::FromPrimitive;
 use num_traits::cast::ToPrimitive;
 use num_traits::NumOps;
@@ -15,8 +17,9 @@ pub trait Dotago {
     fn days(self) -> Self;
     fn week(self) -> Self;
     fn weeks(self) -> Self;
-    fn ago(&self) -> Option<DateTime<Utc>>;
-    fn from_now(&self) -> Option<DateTime<Utc>>;
+    fn ago(&self) -> i64;
+    fn from_now(&self) -> i64;
+    fn as_date(self) -> Option<DateTime<Utc>>;
 }
 
 impl<T> Dotago for T
@@ -63,20 +66,33 @@ where
         self.days() * T::from_u32(7).unwrap()
     }
 
-    fn ago(&self) -> Option<DateTime<Utc>> {
-        Utc::now().checked_sub_signed(Duration::milliseconds(self.to_i64().unwrap()))
+    fn ago(&self) -> i64 {
+        Utc::now()
+            .checked_sub_signed(Duration::milliseconds(self.to_i64().unwrap()))
+            .unwrap()
+            .timestamp_millis()
     }
 
-    fn from_now(&self) -> Option<DateTime<Utc>> {
-        Utc::now().checked_add_signed(Duration::milliseconds(self.to_i64().unwrap()))
+    fn from_now(&self) -> i64 {
+        Utc::now()
+            .checked_add_signed(Duration::milliseconds(self.to_i64().unwrap()))
+            .unwrap()
+            .timestamp_millis()
+    }
+
+    fn as_date(self) -> Option<DateTime<Utc>> {
+        match Utc.timestamp_millis_opt(self.to_i64().unwrap()) {
+            LocalResult::Single(dt) => Some(dt),
+            _ => None,
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use claim::assert_ge;
-    use claim::assert_le;
+    use claims::assert_ge;
+    use claims::assert_le;
 
     #[test]
     fn second() {
@@ -140,7 +156,7 @@ mod tests {
 
     #[test]
     fn five_minutes_ago() {
-        let ts = 5.minutes().ago().unwrap().timestamp();
+        let ts = 5.minutes().ago().as_date().unwrap().timestamp();
 
         let expected = Utc::now()
             .checked_sub_signed(Duration::minutes(5))
